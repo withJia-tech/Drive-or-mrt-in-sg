@@ -1,0 +1,60 @@
+/**
+ * Is It Worth It? — design tokens
+ * Single source of truth for the suite. Phase 1 extracts tokens only;
+ * component CSS stays inside each calculator until there are six to compare.
+ *
+ * Rule for this file: it declares values, never selectors beyond :root.
+ * The moment it styles a component it stops being a token file.
+ */
+
+:root {
+  /* The suite commits to one warm light look. Declaring the scheme stops
+     browsers and in-app webviews auto-inverting it into something else. */
+  color-scheme: light;
+
+  /* BASE — warm bone, not cream, not green */
+  --bone: #FFF3E4;
+  --bone-deep: #FFE4C7;
+  --card: #FFFFFF;
+
+  /* INK — near-black plum */
+  --ink: #1C1015;
+  --ink-soft: #5A4249;
+  --ink-faint: #9B8288;
+
+  /* PRIMARY — electric coral */
+  --coral: #FF4A26;
+  --coral-deep: #D32E0E;
+  --coral-pale: #FFD9CE;
+
+  /* ACCENTS — contemporary maximalist */
+  --tangerine: #FFA318;
+  --tangerine-pale: #FFE9C2;
+  --pink: #FF2E7E;
+  --pink-pale: #FFD6E6;
+  --cobalt: #2B4EFF;
+  --cobalt-deep: #1631C4;
+  --cobalt-pale: #D5DCFF;
+  --lilac: #C6B5FF;
+
+  --border: #1C1015;
+  --border-soft: #E8D5C4;
+
+  /* Hard offset shadows — the load-bearing gesture of the whole system */
+  --hard: 3px 3px 0 var(--ink);
+  --hard-lg: 5px 5px 0 var(--ink);
+  --hard-coral: 3px 3px 0 var(--coral);
+  --hard-cobalt: 5px 5px 0 var(--cobalt-deep);
+
+  /* Type */
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  /* Form */
+  --radius-pill: 100px;
+  --radius-card: 18px;
+  --radius-panel: 16px;
+
+  --shell: 440px;
+}

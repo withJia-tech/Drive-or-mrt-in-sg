@@ -1,0 +1,45 @@
+{
+  "assumptionsVersion": "2026.08",
+  "lastReviewed": "2026-08-17",
+  "caveat": "Every value below is an assumption, not a live figure. The calculator stamps this version onto shared results so a stale number is visible rather than silently wrong.",
+  "trip": {
+    "petrolPrice": 3.0,
+    "fuelEconomy": 12,
+    "erp": 0,
+    "petrolNote": "Sinopec with card ~$2.66 · Shell full price ~$3.46",
+    "fuelNote": "A typical Singapore sedan does about 12."
+  },
+  "alternatives": {
+    "mrtFare": 1.8,
+    "walkTime": 10,
+    "hourlyRate": 25,
+    "fareNote": "Cross-island averages around $1.80.",
+    "hourlyNote": "$4,000 a month is roughly $25/hr (MoneySense)."
+  },
+  "grabEstimate": {
+    "logicId": "H2",
+    "base": 3.5,
+    "perKm": 0.55,
+    "caveat": "Ignores surge, time of day and platform fees. No public Grab API exists, so this stays an estimate and is always labelled as one."
+  },
+  "speeds": {
+    "driveKmh": 40,
+    "driveBufferMin": 4,
+    "mrtKmh": 25,
+    "grabKmh": 40,
+    "grabBufferMin": 6,
+    "returnJourney": true,
+    "caveat": "H3 and H4. No traffic model, no transfer or platform-wait model. The MRT figure is the most under-modelled number in the build.",
+    "note": "Times are for the whole return journey, matching the costs, which are all return figures too. The drive buffer is time spent finding a space; the Grab buffer is time spent waiting for the car."
+  },
+  "verdict": {
+    "logicId": "D9",
+    "thresholdSgd": 5,
+    "caveat": "H7. A flat $5 band is arbitrary and does not scale with trip cost. A proportional band, max(5, 0.15 x driveTotal), is the noted fix path but is deliberately NOT implemented here, because D9 in the handoff specifies the flat threshold."
+  },
+  "limits": {
+    "maxDistanceKm": 300,
+    "maxParkHours": 72,
+    "caveat": "Guards against absurd input. Singapore is about 50 km end to end, so 300 km of one-way driving is already generous."
+  }
+}

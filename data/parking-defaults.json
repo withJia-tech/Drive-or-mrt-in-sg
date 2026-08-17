@@ -1,0 +1,52 @@
+{
+  "version": "1.1.0",
+  "lastReviewed": "2026-08-17",
+  "logicId": "H1",
+  "status": "heuristic",
+  "caveat": "Indicative flat hourly rates. Real Singapore carparks bill per 30 minutes with tiered escalation, and rates differ by day and time. These are approximations for comparison, not quotes.",
+  "upgradePath": "Phase 2 replaces this file with published HDB and URA carpark rates. Only the numbers change; the shape of this file does not.",
+  "destinations": [
+    {
+      "id": "hdb",
+      "label": "HDB carpark",
+      "shortLabel": "HDB carpark",
+      "rate": 0.6,
+      "source": "Typical HDB short-term rate"
+    },
+    {
+      "id": "heartland",
+      "label": "Heartland mall — Tampines, JEM",
+      "shortLabel": "heartland mall",
+      "rate": 2.0,
+      "source": "Typical heartland mall rate"
+    },
+    {
+      "id": "cbd",
+      "label": "CBD or Orchard — ION, Raffles City",
+      "shortLabel": "CBD or Orchard mall",
+      "rate": 5.0,
+      "source": "Typical central-area weekday rate"
+    },
+    {
+      "id": "public-hosp",
+      "label": "Public hospital — SGH, NUH, TTSH",
+      "shortLabel": "public hospital",
+      "rate": 3.0,
+      "source": "Typical restructured-hospital visitor rate"
+    },
+    {
+      "id": "private-hosp",
+      "label": "Private hospital — Mt E, Gleneagles",
+      "shortLabel": "private hospital",
+      "rate": 5.5,
+      "source": "Typical private-hospital visitor rate"
+    },
+    {
+      "id": "other",
+      "label": "Other",
+      "shortLabel": "this destination",
+      "rate": null,
+      "source": "Your own figure"
+    }
+  ]
+}

@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en-SG">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drive There or MRT? — Is It Worth It?</title>
+<meta name="description" content="A per-trip honesty check for Singapore drivers. Work out what one journey really costs by car, MRT or Grab — including the parking bill that usually decides it.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Drive There or MRT?">
+<meta property="og:description" content="Parking at the other end is usually what swings it. One trip, three ways.">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared/tokens.css">
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  padding: 22px 14px 120px;
+  position: relative;
+  background-image:
+    radial-gradient(circle at 8% 4%, rgba(255,74,38,.14) 0%, transparent 32%),
+    radial-gradient(circle at 94% 22%, rgba(255,46,126,.11) 0%, transparent 30%),
+    radial-gradient(circle at 50% 96%, rgba(43,78,255,.10) 0%, transparent 38%);
+  background-attachment: fixed;
+}
+
+.app { max-width: var(--shell); margin: 0 auto; }
+
+/* Focus ring, distinct from every hover state in the page. */
+:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; border-radius: 6px; }
+
+.skip {
+  position: absolute; left: 14px; top: -5rem; z-index: 90;
+  background: var(--ink); color: var(--bone);
+  padding: 10px 16px; border-radius: var(--radius-pill);
+  font-weight: 700; font-size: 13px; text-decoration: none;
+  transition: top .2s;
+}
+.skip:focus { top: 14px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ===== MASTHEAD ===== */
+.masthead { margin-bottom: 22px; padding-top: 4px; }
+
+.issue-strip {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.issue-tag {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 5px 10px; border: 2px solid var(--ink); border-radius: var(--radius-pill);
+  background: var(--card);
+}
+.issue-tag.fill-coral { background: var(--coral); color: #fff; border-color: var(--coral); }
+.issue-tag.fill-tangerine { background: var(--tangerine); color: var(--ink); border-color: var(--tangerine); }
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 46px; font-weight: 800;
+  line-height: .92; letter-spacing: -.045em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 96;
+}
+h1 .hl {
+  background: var(--tangerine);
+  padding: 0 6px; margin: 0 -2px;
+  border-radius: 4px;
+  display: inline-block;
+  transform: rotate(-1.2deg);
+}
+h1 .or {
+  color: var(--coral);
+  font-size: .5em; font-weight: 600;
+  vertical-align: middle; margin: 0 8px;
+  letter-spacing: -.02em;
+}
+
+.deck {
+  font-size: 15px; font-weight: 500; color: var(--ink-soft);
+  margin-top: 14px; line-height: 1.45; max-width: 340px;
+}
+
+/* ===== PROGRESS ===== */
+.progress { display: flex; gap: 5px; margin: 20px 0 16px; }
+.progress-seg {
+  flex: 1; height: 8px; border-radius: var(--radius-pill);
+  background: var(--card); border: 2px solid var(--ink);
+  transition: background .3s;
+}
+.progress-seg.done { background: var(--coral); }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-card);
+  margin-bottom: 14px;
+  box-shadow: var(--hard);
+  overflow: hidden;
+  transition: box-shadow .2s;
+}
+
+.card-header {
+  width: 100%; padding: 15px 16px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; user-select: none;
+  border: 0; border-bottom: 2.5px solid var(--ink);
+  font-family: inherit; color: inherit; text-align: left;
+  transition: filter .15s;
+}
+.card.collapsed .card-header { border-bottom-color: transparent; }
+.card-header:active { filter: brightness(.95); }
+
+#card1 .card-header { background: var(--coral-pale); }
+#card2 .card-header { background: var(--tangerine-pale); }
+#card3 .card-header { background: var(--cobalt-pale); }
+#card4 .card-header { background: var(--pink-pale); }
+
+.card-num {
+  font-family: var(--font-mono);
+  font-size: 13px; font-weight: 700;
+  color: #fff; background: var(--ink);
+  width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-header-text { flex: 1; min-width: 0; }
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 19px; font-weight: 700; letter-spacing: -.03em;
+  color: var(--ink); line-height: 1.15;
+}
+
+.card-summary {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500; color: var(--ink-soft);
+  margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.chevron {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: var(--card); border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.chevron svg { width: 12px; height: 8px; }
+.card.collapsed .chevron { transform: rotate(180deg); }
+
+.card-body {
+  padding: 20px 16px 22px;
+  max-height: 1400px; opacity: 1;
+  transition: max-height .35s cubic-bezier(.2,.8,.2,1), opacity .2s, padding .35s;
+  overflow: hidden;
+}
+/* visibility, not just max-height: without it the fields inside a collapsed
+   card stay in the tab order and focus disappears into a closed panel. */
+.card.collapsed .card-body {
+  max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0;
+  visibility: hidden;
+}
+
+/* ===== FIELDS ===== */
+.field { margin-bottom: 18px; }
+.field:last-child { margin-bottom: 0; }
+
+.field-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink); margin-bottom: 8px;
+}
+.field-label .req {
+  color: #fff; background: var(--coral);
+  font-size: 9px; padding: 2px 6px; border-radius: var(--radius-pill);
+  margin-left: 6px; letter-spacing: .08em;
+}
+
+.field-helper {
+  font-size: 12px; font-weight: 500; color: var(--ink-soft);
+  margin-top: 8px; line-height: 1.4; padding-left: 2px;
+}
+.field-helper.active { color: var(--cobalt-deep); font-weight: 700; }
+
+.input-wrap { position: relative; }
+
+.input-prefix, .input-suffix {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 15px; font-weight: 700; color: var(--ink-faint);
+  pointer-events: none;
+}
+.input-prefix { left: 18px; }
+.input-suffix { right: 18px; font-size: 12px; }
+
+input[type="number"], select {
+  width: 100%;
+  background: var(--bone);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 15px 18px;
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 600;
+  color: var(--ink);
+  transition: all .18s;
+  -webkit-appearance: none; appearance: none;
+}
+input.has-prefix { padding-left: 34px; }
+input.has-suffix { padding-right: 54px; }
+
+input:focus, select:focus {
+  outline: none;
+  background: #fff;
+  box-shadow: var(--hard-coral);
+  transform: translate(-1px,-1px);
+}
+input:focus-visible, select:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
+
+input.filled { background: var(--cobalt-pale); }
+
+select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231C1015' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 18px center;
+  padding-right: 44px; cursor: pointer; font-size: 15px;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* ===== SEGMENTED ===== */
+.segmented {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;
+}
+.seg {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 13px 8px;
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; letter-spacing: -.01em;
+  color: var(--ink); cursor: pointer; transition: all .18s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.seg .seg-icon { font-size: 17px; }
+.seg[aria-selected="true"] {
+  background: var(--cobalt); color: #fff; border-color: var(--ink);
+  box-shadow: var(--hard);
+  transform: translate(-1px,-1px);
+}
+
+.seg-panel[hidden] { display: none; }
+.seg-panel { animation: pop .25s cubic-bezier(.2,.8,.2,1); }
+@keyframes pop { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:none; } }
+
+/* ===== DISCLOSURE ===== */
+.disclosure { border-top: 2px dashed var(--border-soft); margin-top: 20px; }
+.disclosure-toggle {
+  width: 100%; background: transparent; border: none;
+  padding: 14px 2px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 700; color: var(--ink-soft);
+  transition: color .18s; text-align: left;
+}
+.disclosure-toggle:hover { color: var(--coral); }
+.disclosure-toggle .arrow {
+  transition: transform .3s; font-size: 10px; flex-shrink: 0;
+  width: 22px; height: 22px; border-radius: 7px;
+  border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+}
+.disclosure.open .disclosure-toggle .arrow { transform: rotate(180deg); }
+
+.disclosure-body {
+  max-height: 0; overflow: hidden; opacity: 0; visibility: hidden;
+  transition: max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s;
+}
+.disclosure.open .disclosure-body {
+  max-height: 900px; opacity: 1; visibility: visible;
+  padding-top: 6px; padding-bottom: 6px;
+}
+
+/* ===== CHIPS ===== */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-pill); padding: 10px 15px;
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 700;
+  color: var(--ink); cursor: pointer; transition: all .18s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.chip:active { transform: scale(.97); }
+.chip[aria-pressed="true"] {
+  background: var(--pink); color: #fff;
+  box-shadow: var(--hard); transform: translate(-1px,-1px);
+}
+
+/* ===== STICKY CTA ===== */
+.cta-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(255,243,228,.96);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-top: 2.5px solid var(--ink);
+  padding: 13px 14px calc(13px + env(safe-area-inset-bottom));
+  z-index: 50;
+}
+.cta-inner { max-width: var(--shell); margin: 0 auto; }
+
+.calculate-btn {
+  width: 100%;
+  background: var(--coral); color: #fff;
+  border: 2.5px solid var(--ink); border-radius: var(--radius-pill);
+  padding: 17px;
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 800; letter-spacing: -.02em;
+  cursor: pointer; transition: all .18s;
+  box-shadow: var(--hard);
+}
+.calculate-btn:hover:not(:disabled) {
+  background: var(--cobalt); transform: translate(-1px,-1px);
+  box-shadow: var(--hard-lg);
+}
+.calculate-btn:active:not(:disabled) { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
+.calculate-btn:disabled {
+  background: var(--border-soft); color: var(--ink-faint);
+  cursor: not-allowed; box-shadow: none;
+  font-size: 15px; font-weight: 700;
+}
+
+/* ===== RESULT ===== */
+.result[hidden] { display: none; }
+.result { animation: slideUp .5s cubic-bezier(.2,.8,.2,1); }
+@keyframes slideUp { from { opacity:0; transform: translateY(24px);} to { opacity:1; transform:none; } }
+
+.result-flag {
+  display: inline-block;
+  background: var(--ink); color: var(--tangerine);
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 7px 14px; border-radius: var(--radius-pill);
+  margin: 28px 0 14px;
+}
+
+.result-title {
+  font-family: var(--font-display);
+  font-size: 42px; font-weight: 800;
+  line-height: .94; letter-spacing: -.045em;
+  color: var(--ink); margin-bottom: 24px;
+  font-variation-settings: "opsz" 96;
+}
+.result-title:focus { outline: none; }
+.result-title .accent {
+  background: var(--cobalt); color: #fff;
+  padding: 0 8px; border-radius: 6px;
+  display: inline-block; transform: rotate(-1.2deg);
+}
+
+.compare { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 22px; }
+
+.option {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-panel);
+  padding: 20px 6px 16px; text-align: center;
+  position: relative; transition: all .3s cubic-bezier(.2,.8,.2,1);
+}
+.option.winner {
+  background: var(--cobalt);
+  transform: translate(-2px,-4px);
+  box-shadow: var(--hard-cobalt);
+}
+.option.winner .option-name { color: var(--cobalt-pale); }
+.option.winner .option-cost { color: #fff; }
+.option.winner .option-time { color: var(--tangerine); }
+
+.option-badge {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: var(--tangerine); color: var(--ink);
+  border: 2.5px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 4px 10px; border-radius: var(--radius-pill); white-space: nowrap;
+}
+
+.option-icon { font-size: 25px; margin-bottom: 8px; }
+
+.option-name {
+  font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 11px;
+}
+.option-cost {
+  font-family: var(--font-display);
+  font-size: 25px; font-weight: 800; letter-spacing: -.04em;
+  color: var(--ink); margin-bottom: 5px; line-height: 1;
+}
+.option-time {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 500; color: var(--ink-faint);
+}
+.option-est {
+  display: block; margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 8px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--coral-deep);
+}
+.option.winner .option-est { color: var(--tangerine); }
+
+/* ===== BREAKDOWN ===== */
+.breakdown {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-panel); padding: 18px; margin-bottom: 12px;
+}
+.breakdown-title {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink);
+  margin-bottom: 14px; padding-bottom: 11px;
+  border-bottom: 2px dashed var(--border-soft);
+  display: flex; align-items: center; gap: 8px;
+}
+.breakdown-title .icon { font-size: 14px; }
+
+.breakdown-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 9px; font-size: 14px; font-weight: 500; gap: 12px;
+}
+.breakdown-row:last-child { margin-bottom: 0; }
+.breakdown-row .label { color: var(--ink-soft); }
+.breakdown-row .val {
+  font-family: var(--font-mono);
+  font-weight: 700; font-size: 15px; color: var(--ink); flex-shrink: 0;
+}
+.breakdown-row.soft .label, .breakdown-row.soft .val {
+  color: var(--ink-faint); font-size: 12px; font-weight: 500;
+}
+.breakdown-row.total {
+  border-top: 2px dashed var(--border-soft); padding-top: 12px; margin-top: 12px;
+}
+.breakdown-row.total .label {
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 16px; letter-spacing: -.02em; color: var(--ink);
+}
+.breakdown-row.total .val {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 800; letter-spacing: -.03em;
+}
+
+/* ===== CALLOUT ===== */
+.callout {
+  background: var(--tangerine);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-panel);
+  padding: 20px; margin-bottom: 12px;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  line-height: 1.45;
+  box-shadow: var(--hard);
+}
+.callout[hidden] { display: none; }
+.callout .lead {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; display: block; margin-bottom: 10px;
+  opacity: .7;
+}
+.callout strong { font-weight: 800; }
+.callout .pct {
+  font-family: var(--font-display);
+  font-size: 1.5em; font-weight: 800; letter-spacing: -.03em;
+  display: inline-block; vertical-align: -2px;
+}
+
+/* ===== VERDICT ===== */
+.verdict {
+  background: var(--ink); color: var(--bone);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-panel); padding: 24px 20px; margin-bottom: 12px;
+  position: relative; overflow: hidden;
+  box-shadow: var(--hard-coral);
+}
+.verdict::after {
+  content:''; position: absolute; bottom: -50px; right: -50px;
+  width: 170px; height: 170px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,74,38,.45) 0%, transparent 68%);
+}
+.verdict-label {
+  display: inline-block;
+  background: var(--tangerine); color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 5px 11px; border-radius: var(--radius-pill); margin-bottom: 14px;
+  position: relative; z-index: 1;
+}
+.verdict-text {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 600; line-height: 1.3; letter-spacing: -.025em;
+  position: relative; z-index: 1;
+}
+.verdict-text strong { font-weight: 800; color: var(--tangerine); }
+.verdict-modifier {
+  margin-top: 18px; padding-top: 16px;
+  border-top: 2px dashed rgba(255,243,228,.25);
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 500; color: var(--bone-deep);
+  line-height: 1.5; position: relative; z-index: 1;
+}
+.verdict-modifier[hidden] { display: none; }
+
+/* ===== COPY ===== */
+.copy-btn {
+  width: 100%; background: var(--card);
+  border: 2.5px solid var(--ink); border-radius: var(--radius-pill);
+  padding: 16px;
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  cursor: pointer; transition: all .18s;
+  box-shadow: var(--hard);
+}
+.copy-btn:hover { background: var(--pink); color: #fff; transform: translate(-1px,-1px); box-shadow: var(--hard-lg); }
+.copy-btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
+.copy-btn.copied { background: var(--cobalt); color: #fff; }
+
+/* ===== ASSUMPTIONS ===== */
+.assumptions { margin-top: 16px; }
+.assumptions .disclosure { border-top: 2px dashed var(--ink); }
+.assumptions ul { list-style: none; }
+.assumptions li {
+  font-size: 12.5px; color: var(--ink-soft); line-height: 1.45;
+  padding: 9px 0; border-bottom: 1px dashed var(--border-soft);
+}
+.assumptions li:last-child { border-bottom: 0; }
+.assumptions li b {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+  display: block; margin-bottom: 2px;
+}
+
+/* ===== COLOPHON ===== */
+.colophon { margin-top: 34px; padding-top: 22px; border-top: 2.5px solid var(--ink); }
+
+.disclaimer {
+  background: var(--coral-pale);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--radius-panel);
+  padding: 15px 16px; margin-bottom: 18px;
+  font-size: 12.5px; font-weight: 500; color: var(--ink); line-height: 1.45;
+}
+.disclaimer b { font-weight: 800; }
+
+.footer-nav { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+.footer-nav a, .footer-nav span.soon {
+  font-family: var(--font-body);
+  font-size: 12px; font-weight: 700; color: var(--ink);
+  text-decoration: none; transition: color .18s;
+  border: 2px solid var(--ink); border-radius: var(--radius-pill);
+  padding: 8px 12px; background: var(--card);
+}
+.footer-nav a:hover { background: var(--coral); color: #fff; }
+/* Not links yet — the rest of the suite is not built. A styled dead link that
+   goes nowhere is worse than one that says so. */
+.footer-nav span.soon {
+  color: var(--ink-faint); border-color: var(--border-soft);
+  border-style: dashed; background: transparent; cursor: default;
+}
+
+.suite-line {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 500; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+  text-align: center;
+}
+.suite-line .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); }
+.suite-line .accent { color: var(--ink); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 380px) {
+  h1 { font-size: 38px; }
+  .result-title { font-size: 34px; }
+  .option-cost { font-size: 21px; }
+  .verdict-text { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#card1">Skip to the calculator</a>
+
+<div class="app">
+
+  <header class="masthead">
+    <div class="issue-strip">
+      <span class="issue-tag fill-coral">Issue 04b</span>
+      <span class="issue-tag">Singapore</span>
+      <span class="issue-tag fill-tangerine">Per-trip</span>
+    </div>
+    <h1>Drive there<span class="or">or</span><br><span class="hl">take the train.</span></h1>
+    <p class="deck">A per-trip honesty check for the driver standing at the door, deciding right now.</p>
+  </header>
+
+  <div class="progress" role="img" aria-label="Progress through the required fields">
+    <div class="progress-seg" id="p1"></div>
+    <div class="progress-seg" id="p2"></div>
+    <div class="progress-seg" id="p3"></div>
+  </div>
+
+  <!-- 01 -->
+  <div class="card" id="card1">
+    <button type="button" class="card-header" aria-expanded="true" aria-controls="body1">
+      <span class="card-num">01</span>
+      <span class="card-header-text">
+        <span class="card-title">Your trip</span>
+        <span class="card-summary" id="sum1">How far are you going?</span>
+      </span>
+      <span class="chevron"><svg viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 6l5-5 5 5" stroke="#1C1015" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="card-body" id="body1">
+      <div class="field">
+        <label class="field-label" for="distance">Distance, one way <span class="req">Required</span></label>
+        <div class="input-wrap">
+          <input type="number" id="distance" placeholder="Enter distance" min="0" step="0.5" inputmode="decimal" class="has-suffix">
+          <span class="input-suffix">km</span>
+        </div>
+      </div>
+
+      <div class="disclosure" id="disc1">
+        <button type="button" class="disclosure-toggle" data-disc="disc1" aria-expanded="false" aria-controls="disc1body">
+          <span>Cost assumptions — petrol, fuel economy, ERP</span>
+          <span class="arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="disclosure-body" id="disc1body">
+          <div class="field">
+            <label class="field-label" for="petrol">Petrol per litre</label>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input type="number" id="petrol" min="0" step="0.01" inputmode="decimal" class="has-prefix">
+            </div>
+            <p class="field-helper" id="petrolNote"></p>
+          </div>
+          <div class="field">
+            <label class="field-label" for="fuel">Fuel consumption</label>
+            <div class="input-wrap">
+              <input type="number" id="fuel" min="1" step="0.5" inputmode="decimal" class="has-suffix">
+              <span class="input-suffix">km/L</span>
+            </div>
+            <p class="field-helper" id="fuelNote"></p>
+          </div>
+          <div class="field">
+            <label class="field-label" for="erp">ERP for this route</label>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input type="number" id="erp" min="0" step="0.50" inputmode="decimal" class="has-prefix">
+            </div>
+            <p class="field-helper">Add only if your route hits gantries. We cannot read them live.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="card" id="card2">
+    <button type="button" class="card-header" aria-expanded="true" aria-controls="body2">
+      <span class="card-num">02</span>
+      <span class="card-header-text">
+        <span class="card-title">Parking</span>
+        <span class="card-summary" id="sum2">Usually what swings the answer</span>
+      </span>
+      <span class="chevron"><svg viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 6l5-5 5 5" stroke="#1C1015" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="card-body" id="body2">
+      <div class="field">
+        <label class="field-label" for="destType">Where are you parking?</label>
+        <select id="destType"></select>
+      </div>
+      <div class="field">
+        <label class="field-label" for="parkRate">Rate per hour</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input type="number" id="parkRate" placeholder="0.00" min="0" step="0.10" inputmode="decimal" class="has-prefix">
+        </div>
+        <p class="field-helper" id="parkHelper">Auto-fills when you pick a destination type.</p>
+      </div>
+      <div class="field">
+        <label class="field-label" for="parkHours">How long will you park? <span class="req">Required</span></label>
+        <div class="input-wrap">
+          <input type="number" id="parkHours" placeholder="Enter hours" min="0" step="0.5" inputmode="decimal" class="has-suffix">
+          <span class="input-suffix">hrs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="card" id="card3">
+    <button type="button" class="card-header" aria-expanded="true" aria-controls="body3">
+      <span class="card-num">03</span>
+      <span class="card-header-text">
+        <span class="card-title">Compare against</span>
+        <span class="card-summary" id="sum3">Both are calculated either way</span>
+      </span>
+      <span class="chevron"><svg viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 6l5-5 5 5" stroke="#1C1015" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="card-body" id="body3">
+      <div class="segmented" role="tablist" aria-label="Which alternative to adjust">
+        <button type="button" class="seg" role="tab" id="tab-mrt" aria-selected="true" aria-controls="panel-mrt"><span class="seg-icon" aria-hidden="true">🚇</span> MRT / Bus</button>
+        <button type="button" class="seg" role="tab" id="tab-grab" aria-selected="false" aria-controls="panel-grab"><span class="seg-icon" aria-hidden="true">🚕</span> Grab</button>
+      </div>
+
+      <div class="seg-panel" role="tabpanel" id="panel-mrt" aria-labelledby="tab-mrt">
+        <div class="field">
+          <label class="field-label" for="mrtFare">Fare, one way</label>
+          <div class="input-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" id="mrtFare" min="0" step="0.10" inputmode="decimal" class="has-prefix">
+          </div>
+          <p class="field-helper" id="fareNote"></p>
+        </div>
+        <div class="disclosure" id="disc3">
+          <button type="button" class="disclosure-toggle" data-disc="disc3" aria-expanded="false" aria-controls="disc3body">
+            <span>Value your walking time</span>
+            <span class="arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="disclosure-body" id="disc3body">
+            <div class="field">
+              <label class="field-label" for="walkTime">Walk from station</label>
+              <div class="input-wrap">
+                <input type="number" id="walkTime" min="0" step="1" inputmode="decimal" class="has-suffix">
+                <span class="input-suffix">min</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="hourlyRate">Your hourly rate</label>
+              <div class="input-wrap">
+                <span class="input-prefix">$</span>
+                <input type="number" id="hourlyRate" min="0" step="1" inputmode="decimal" class="has-prefix has-suffix">
+                <span class="input-suffix">/hr</span>
+              </div>
+              <p class="field-helper" id="hourlyNote"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="seg-panel" role="tabpanel" id="panel-grab" aria-labelledby="tab-grab" hidden>
+        <div class="field">
+          <label class="field-label" for="grabFare">Fare, one way</label>
+          <div class="input-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" id="grabFare" placeholder="Check your app" min="0" step="0.50" inputmode="decimal" class="has-prefix">
+          </div>
+          <p class="field-helper" id="grabNote"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="card collapsed" id="card4">
+    <button type="button" class="card-header" aria-expanded="false" aria-controls="body4">
+      <span class="card-num">04</span>
+      <span class="card-header-text">
+        <span class="card-title">Trip context</span>
+        <span class="card-summary" id="sum4">Optional — changes framing, not maths</span>
+      </span>
+      <span class="chevron"><svg viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 6l5-5 5 5" stroke="#1C1015" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="card-body" id="body4">
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result" id="result" hidden aria-labelledby="resultTitle">
+    <div class="result-flag">The verdict</div>
+    <h2 class="result-title" id="resultTitle" tabindex="-1"></h2>
+    <div class="compare" id="compare"></div>
+    <div class="breakdown" id="driveBreakdown"></div>
+    <div class="breakdown" id="mrtBreakdown"></div>
+    <div class="callout" id="callout"></div>
+    <div class="verdict">
+      <div class="verdict-label">Bottom line</div>
+      <div class="verdict-text" id="verdictText"></div>
+      <div class="verdict-modifier" id="verdictModifier" hidden></div>
+    </div>
+    <button type="button" class="copy-btn" id="copyBtn"><span id="copyLabel">Clip for the group chat</span></button>
+
+    <div class="assumptions">
+      <div class="disclosure" id="discA">
+        <button type="button" class="disclosure-toggle" data-disc="discA" aria-expanded="false" aria-controls="discAbody">
+          <span>What we assumed to get these numbers</span>
+          <span class="arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="disclosure-body" id="discAbody">
+          <ul id="assumeList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sr-only" role="status" aria-live="polite" id="live"></p>
+
+  <div class="colophon">
+    <p class="disclaimer">
+      <b>Estimates only.</b> Every figure here comes from published averages and
+      the stated assumptions above — not live fares, live ERP, or the actual
+      rate at the carpark you are driving to. This tool prices hospital trips,
+      so please check before you commit money to it.
+    </p>
+    <nav class="footer-nav" aria-label="Other calculators">
+      <span class="soon">← Drive to work? · soon</span>
+      <span class="soon">Lunch Kalkulator · soon</span>
+    </nav>
+    <div class="suite-line">
+      <span>Part of the</span><span class="dot"></span>
+      <span class="accent">Is It Worth It?</span><span class="dot"></span><span>Suite</span>
+      <span class="dot"></span><span id="verStamp"></span>
+    </div>
+  </div>
+
+</div>
+
+<div class="cta-bar">
+  <div class="cta-inner">
+    <button type="button" class="calculate-btn" id="calcBtn" disabled><span id="calcLabel">Enter distance to begin</span></button>
+  </div>
+</div>
+
+<script type="module">
+import { computeAll, shareString, toNumber, round2 } from './calc.js';
+import { loadAssumptions } from './defaults.js';
+
+const $ = (id) => document.getElementById(id);
+const money = (n) => `$${n.toFixed(2)}`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+/* Assumptions come from /data/*.json, or the built-in mirror if that fetch
+   cannot happen. Nothing below runs on numbers it cannot name. */
+const { fares, parking, source } = await loadAssumptions();
+
+const state = { context: null, rateOverridden: false };
+let lastResult = null;
+let lastMeta = null;
+
+/* ---------------------------------------------------------------- copy bank */
+const CONTEXTS = [
+  { id: 'errand',  label: '🛒 Routine errand', copy: null },
+  { id: 'medical', label: '🏥 Medical',
+    copy: (d) => `For a medical appointment, comfort and reliability matter. Factor that into the ${money(d)} difference.` },
+  { id: 'heavy',   label: '📦 Heavy items',
+    copy: () => `Carrying heavy items on the MRT is its own kind of cost. The premium for driving buys you a boot.` },
+  { id: 'kids',    label: '👶 Kids or elderly',
+    copy: () => `Travelling with young kids or elderly relatives — the MRT savings might not survive the reality of the journey.` },
+  { id: 'event',   label: '🎉 Event',
+    copy: () => `Heading to an event? Remember you can't drink if you drive. Grab might be the play.` },
+];
+
+const destById = (id) => parking.destinations.find((d) => d.id === id);
+
+/* ------------------------------------------------------------------- build */
+$('destType').replaceChildren(
+  Object.assign(document.createElement('option'), { value: '', textContent: 'Select destination type' }),
+  ...parking.destinations.map((d) =>
+    Object.assign(document.createElement('option'), { value: d.id, textContent: d.label })),
+);
+
+$('chips').replaceChildren(...CONTEXTS.map((c) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'chip';
+  b.textContent = c.label;
+  b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => {
+    state.context = state.context === c.id ? null : c.id;
+    document.querySelectorAll('#chips .chip').forEach((el, i) =>
+      el.setAttribute('aria-pressed', String(CONTEXTS[i].id === state.context)));
+    sync();
+    if (lastResult) paintVerdict(lastResult); // copy only — totals untouched
+  });
+  return b;
+}));
+
+/* Seed the defaulted fields and their helper notes from the data file, so the
+   numbers on screen and the numbers in /data cannot say different things. */
+$('petrol').value = fares.trip.petrolPrice.toFixed(2);
+$('fuel').value = fares.trip.fuelEconomy;
+$('erp').value = fares.trip.erp;
+$('mrtFare').value = fares.alternatives.mrtFare.toFixed(2);
+$('walkTime').value = fares.alternatives.walkTime;
+$('hourlyRate').value = fares.alternatives.hourlyRate;
+$('petrolNote').textContent = fares.trip.petrolNote;
+$('fuelNote').textContent = fares.trip.fuelNote;
+$('fareNote').textContent = fares.alternatives.fareNote;
+$('hourlyNote').textContent = fares.alternatives.hourlyNote;
+$('grabNote').textContent =
+  `Leave blank and we'll estimate at ${money(fares.grabEstimate.base)} + ${money(fares.grabEstimate.perKm)}/km.`;
+$('verStamp').textContent = `v${fares.assumptionsVersion}`;
+
+/* -------------------------------------------------------------- read state */
+const LIMITS = {
+  distance: fares.limits.maxDistanceKm, parkHours: fares.limits.maxParkHours,
+  parkRate: 200, grabFare: 500, petrol: 20, fuel: 100,
+  erp: 100, mrtFare: 50, walkTime: 240, hourlyRate: 10000,
+};
+
+/** Blank stays null so validation can tell "nothing entered" from "entered 0". */
+function read(id, fallback = null) {
+  const raw = $(id).value.trim();
+  if (raw === '') return fallback;
+  return round2(toNumber(raw, fallback ?? 0, LIMITS[id]));
+}
+
+function currentInput() {
+  return {
+    distance: read('distance') ?? 0,
+    fuelEconomy: read('fuel', fares.trip.fuelEconomy),
+    petrolPrice: read('petrol', fares.trip.petrolPrice),
+    parkRate: read('parkRate') ?? 0,
+    parkHours: read('parkHours') ?? 0,
+    erp: read('erp', fares.trip.erp),
+    mrtFare: read('mrtFare', fares.alternatives.mrtFare),
+    walkTime: read('walkTime', fares.alternatives.walkTime),
+    hourlyRate: read('hourlyRate', fares.alternatives.hourlyRate),
+    grabFare: read('grabFare'), // null triggers the estimate
+  };
+}
+
+/* ------------------------------------------------------------------- sync */
+function sync() {
+  const distance = read('distance');
+  const hrs = read('parkHours');
+  const rate = read('parkRate');
+  const dest = destById($('destType').value);
+
+  $('sum1').textContent = distance ? `${distance} km each way` : 'How far are you going?';
+  $('sum2').textContent = (dest && hrs !== null)
+    ? `${dest.shortLabel} · ${hrs}h at ${money(rate ?? 0)}/hr`
+    : 'Usually what swings the answer';
+  $('sum3').textContent =
+    `MRT ${money(read('mrtFare', fares.alternatives.mrtFare))} · Grab ${read('grabFare') === null ? 'estimated' : money(read('grabFare'))}`;
+  const ctx = CONTEXTS.find((c) => c.id === state.context);
+  $('sum4').textContent = ctx ? ctx.label : 'Optional — changes framing, not maths';
+
+  $('p1').classList.toggle('done', distance !== null);
+  $('p2').classList.toggle('done', !!dest);
+  $('p3').classList.toggle('done', hrs !== null);
+
+  if (state.rateOverridden) {
+    $('parkHelper').textContent = 'Using your custom rate.';
+    $('parkHelper').classList.add('active');
+  } else {
+    $('parkHelper').classList.remove('active');
+    $('parkHelper').textContent = !dest
+      ? 'Auto-fills when you pick a destination type.'
+      : dest.rate === null
+        ? 'Enter the rate manually.'
+        : `Typical for a ${dest.shortLabel}. Override if you know the exact rate.`;
+  }
+
+  const ready = distance !== null && hrs !== null;
+  $('calcBtn').disabled = !ready;
+  $('calcLabel').textContent = ready ? 'Calculate'
+    : distance === null ? 'Enter distance to begin'
+    : 'Enter parking hours';
+
+  ['distance','parkHours','mrtFare','grabFare','parkRate'].forEach((id) =>
+    $(id).classList.toggle('filled', $(id).value.trim() !== ''));
+}
+
+/* --------------------------------------------------------------- verdicts */
+function verdictCopy(r, meta) {
+  const gap = money(r.delta);
+  const dest = esc(meta.destLabel);
+  if (r.band === 'mrt-wins') {
+    return {
+      html: `MRT saves you <strong>${gap}</strong> on this trip. Parking at a ${dest} is the killer — ${money(r.parking)} for just ${meta.parkHours} hours. Unless you need door-to-door, take the train.`,
+      share: `MRT saves ${gap} vs driving. Door-to-door — your call.`,
+    };
+  }
+  if (r.band === 'drive-wins') {
+    return {
+      html: `Driving is cheaper by <strong>${gap}</strong>. Parking at a ${dest} is reasonable enough that petrol is most of what you're really paying. Drive.`,
+      share: `Driving wins by ${gap}. Parking isn't the killer here.`,
+    };
+  }
+  return {
+    html: `It's within <strong>${gap}</strong> either way — this is a comfort call, not a cost one.`,
+    share: `Within ${gap} either way — comfort call.`,
+  };
+}
+
+function paintVerdict(r) {
+  const v = verdictCopy(r, lastMeta);
+  let html = v.html;
+  if (r.winner === 'grab') {
+    html += ` Grab actually beats both at ${money(r.grab)} — door-to-door wins today.`;
+  }
+  $('verdictText').innerHTML = html;
+
+  const ctx = CONTEXTS.find((c) => c.id === state.context);
+  const mod = ctx && ctx.copy ? ctx.copy(r.delta) : null;
+  $('verdictModifier').hidden = !mod;
+  if (mod) $('verdictModifier').textContent = mod;
+  return v;
+}
+
+function paintAssumptions(r, input) {
+  const dest = destById($('destType').value);
+  const rows = [
+    ['Petrol', `${money(input.petrolPrice)} per litre at ${input.fuelEconomy} km/L.`],
+    ['Parking rate', state.rateOverridden || !dest || dest.rate === null
+      ? 'Your own figure.'
+      : `${dest.source} (H1). Indicative only — real carparks bill per 30 minutes with tiered rates.`],
+    ['Grab fare', r.grabEstimated
+      ? `Estimated at ${money(fares.grabEstimate.base)} + ${money(fares.grabEstimate.perKm)}/km one way (H2). Knows nothing about surge.`
+      : 'Your own figure.'],
+    ['Journey times', `${fares.speeds.driveKmh} km/h driving plus ${fares.speeds.driveBufferMin} min parking, ${fares.speeds.mrtKmh} km/h on the MRT plus your walk, Grab plus ${fares.speeds.grabBufferMin} min waiting. All return journeys, no traffic model (H3, H4).`],
+    ['MRT time', 'Our weakest number — it ignores transfers and platform waits entirely (H4).'],
+    ['Verdict band', `Anything inside ${money(fares.verdict.thresholdSgd)} either way is called too close (H7).`],
+    ['Walking time', 'Priced separately and never folded into the MRT headline (H8).'],
+    ['Reviewed', `${fares.lastReviewed}. Assumptions version ${fares.assumptionsVersion}.`],
+  ];
+  $('assumeList').replaceChildren(...rows.map(([k, v]) => {
+    const li = document.createElement('li');
+    const b = document.createElement('b');
+    b.textContent = k;
+    li.append(b, v);
+    return li;
+  }));
+}
+
+/* -------------------------------------------------------------- calculate */
+function calculate() {
+  const input = currentInput();
+  if (!input.distance) return;
+
+  const r = computeAll(input, fares);
+  const dest = destById($('destType').value);
+  lastResult = r;
+  lastMeta = {
+    destLabel: dest ? dest.shortLabel : 'this destination',
+    hasDest: !!dest && dest.rate !== null,
+    parkHours: input.parkHours,
+    distance: input.distance,
+  };
+
+  const options = [
+    { key: 'drive', name: 'Drive', icon: '🚗', cost: r.drive, time: r.times.drive },
+    { key: 'mrt', name: 'MRT', icon: '🚇', cost: r.mrt, time: r.times.mrt },
+    { key: 'grab', name: 'Grab', icon: '🚕', cost: r.grab, time: r.times.grab },
+  ];
+
+  $('compare').replaceChildren(...options.map((o) => {
+    const el = document.createElement('div');
+    el.className = `option${o.key === r.winner ? ' winner' : ''}`;
+    el.innerHTML = `
+      ${o.key === r.winner ? '<div class="option-badge">Cheapest</div>' : ''}
+      <div class="option-icon" aria-hidden="true">${o.icon}</div>
+      <div class="option-name">${o.name}</div>
+      <div class="option-cost">${money(o.cost)}</div>
+      <div class="option-time">~${Math.round(o.time)} min</div>
+      ${o.key === 'grab' && r.grabEstimated ? '<span class="option-est">Estimated</span>' : ''}`;
+    return el;
+  }));
+
+  $('driveBreakdown').innerHTML = `
+    <div class="breakdown-title"><span class="icon" aria-hidden="true">🚗</span> Driving · what makes the total</div>
+    <div class="breakdown-row"><span class="label">Petrol · ${(input.distance * 2).toFixed(1)} km return</span><span class="val">${money(r.petrol)}</span></div>
+    <div class="breakdown-row"><span class="label">Parking · ${input.parkHours}h × ${money(input.parkRate)}</span><span class="val">${money(r.parking)}</span></div>
+    ${r.erp > 0 ? `<div class="breakdown-row"><span class="label">ERP</span><span class="val">${money(r.erp)}</span></div>` : ''}
+    <div class="breakdown-row total"><span class="label">All in</span><span class="val">${money(r.drive)}</span></div>`;
+
+  $('mrtBreakdown').innerHTML = `
+    <div class="breakdown-title"><span class="icon" aria-hidden="true">🚇</span> MRT · what makes the total</div>
+    <div class="breakdown-row"><span class="label">Fare · return</span><span class="val">${money(r.mrt)}</span></div>
+    <div class="breakdown-row total"><span class="label">All in</span><span class="val">${money(r.mrt)}</span></div>
+    <div class="breakdown-row soft"><span class="label">Walk · ${input.walkTime * 2} min at ${money(input.hourlyRate)}/hr</span><span class="val">${money(r.walk)}</span></div>
+    <div class="breakdown-row soft"><span class="label">If you price the walk</span><span class="val">${money(r.mrtWithWalk)}</span></div>`;
+
+  const pct = Math.round(r.parkingShare * 100);
+  $('callout').hidden = r.parking <= 0;
+  if (r.parking > 0) {
+    $('callout').innerHTML =
+      `<span class="lead">The swing variable</span>Parking is <strong>${money(r.parking)}</strong> of your ${money(r.drive)} drive — that's <span class="pct">${pct}%</span> of the total${pct > 50 ? '. That figure alone is what tips this calculation.' : '.'}`;
+  }
+
+  const v = paintVerdict(r);
+  paintAssumptions(r, input);
+
+  const titles = { drive: ['Drive', 'wins this one.'], mrt: ['MRT', 'is the call.'], grab: ['Grab', 'takes it.'] };
+  const [accent, tail] = titles[r.winner];
+  $('resultTitle').innerHTML = `<span class="accent">${accent}</span><br>${tail}`;
+
+  ['card1','card2','card3','card4'].forEach(collapse);
+  $('result').hidden = false;
+  setTimeout(() => {
+    $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('resultTitle').focus({ preventScroll: true });
+  }, 120);
+  $('live').textContent =
+    `Worked out. Driving ${money(r.drive)}, MRT ${money(r.mrt)}, Grab ${money(r.grab)}. ${$('verdictText').textContent}`;
+}
+
+/* --------------------------------------------------------------- plumbing */
+function collapse(cardId) {
+  const card = $(cardId);
+  card.classList.add('collapsed');
+  card.querySelector('.card-header').setAttribute('aria-expanded', 'false');
+}
+
+document.querySelectorAll('.card-header').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.card');
+    const open = card.classList.toggle('collapsed');
+    btn.setAttribute('aria-expanded', String(!open));
+  });
+});
+
+document.querySelectorAll('.disclosure-toggle').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = $(btn.dataset.disc).classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(open));
+  });
+});
+
+/* Both alternatives are always costed. The tabs decide only which inputs are
+   visible — nothing here touches the arithmetic. */
+const TABS = [['tab-mrt', 'panel-mrt'], ['tab-grab', 'panel-grab']];
+TABS.forEach(([tabId]) => {
+  $(tabId).addEventListener('click', () => {
+    TABS.forEach(([t, p]) => {
+      const on = t === tabId;
+      $(t).setAttribute('aria-selected', String(on));
+      $(p).hidden = !on;
+    });
+  });
+});
+$('tab-mrt').parentElement.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  e.preventDefault();
+  const next = document.activeElement.id === 'tab-mrt' ? 'tab-grab' : 'tab-mrt';
+  $(next).click();
+  $(next).focus();
+});
+
+$('destType').addEventListener('change', () => {
+  /* Choosing a destination always re-asserts its default rate, even over a
+     rate the user typed. Changing where you are going invalidates the old
+     figure, and silently keeping it would be the worse surprise. */
+  state.rateOverridden = false;
+  const dest = destById($('destType').value);
+  if (dest && dest.rate !== null) {
+    $('parkRate').value = dest.rate.toFixed(2);
+  } else {
+    $('parkRate').value = '';
+    if (dest) $('parkRate').focus();
+  }
+  sync();
+});
+
+$('parkRate').addEventListener('input', () => {
+  const dest = destById($('destType').value);
+  const raw = $('parkRate').value.trim();
+  state.rateOverridden = raw !== '' && (!dest || dest.rate === null || Number(raw) !== dest.rate);
+  sync();
+});
+
+['distance','parkHours','mrtFare','grabFare','petrol','fuel','erp','walkTime','hourlyRate']
+  .forEach((id) => $(id).addEventListener('input', sync));
+
+$('calcBtn').addEventListener('click', calculate);
+
+/* Clipboard, with a visible failure branch. Older iOS Safari and any
+   non-secure context refuse the write, and a button that silently does
+   nothing is worse than one that admits it. */
+$('copyBtn').addEventListener('click', async () => {
+  if (!lastResult) return;
+  const text = shareString({
+    input: { distance: lastMeta.distance, parkHours: lastMeta.parkHours },
+    result: lastResult,
+    destinationLabel: lastMeta.hasDest ? lastMeta.destLabel : null,
+    verdict: verdictCopy(lastResult, lastMeta).share,
+    assumptionsVersion: fares.assumptionsVersion,
+  });
+  try {
+    if (!navigator.clipboard) throw new Error('no clipboard');
+    await navigator.clipboard.writeText(text);
+    $('copyBtn').classList.add('copied');
+    $('copyLabel').textContent = 'Clipped ✓';
+  } catch {
+    $('copyLabel').textContent = 'Copy failed — select it manually';
+    window.prompt('Copy this:', text);
+  }
+  setTimeout(() => {
+    $('copyBtn').classList.remove('copied');
+    $('copyLabel').textContent = 'Clip for the group chat';
+  }, 2200);
+});
+
+if (source === 'fallback') {
+  $('verStamp').textContent = `v${fares.assumptionsVersion} · built-in`;
+}
+sync();
+</script>
+
+</body>
+</html>
